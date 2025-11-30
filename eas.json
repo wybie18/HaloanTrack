@@ -1,0 +1,51 @@
+{
+  "cli": {
+    "version": ">= 7.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://haloantrack.online/api",
+        "EXPO_PUBLIC_PUSHER_APP_KEY": "8a605b9171530bb12bb7",
+        "EXPO_PUBLIC_PUSHER_APP_CLUSTER": "ap1"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://haloantrack.online/api",
+        "EXPO_PUBLIC_PUSHER_APP_KEY": "8a605b9171530bb12bb7",
+        "EXPO_PUBLIC_PUSHER_APP_CLUSTER": "ap1"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://haloantrack.online/api",
+        "EXPO_PUBLIC_PUSHER_APP_KEY": "8a605b9171530bb12bb7",
+        "EXPO_PUBLIC_PUSHER_APP_CLUSTER": "ap1"
+      }
+    },
+    "website-release": {
+      "extends": "production",
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
