@@ -88,8 +88,13 @@ export default function LoginScreen() {
     }
     try {
       await login(email, password);
-    } catch (error) {
-      Alert.alert("Login Failed", "Invalid credentials or network error");
+    } catch (error: any) {
+      const data = error.response?.data;
+      const errorMessage = data?.errors
+        ? Object.values(data.errors).flat().join("\n")
+        : data?.message || "Invalid credentials or network error";
+
+      Alert.alert("Login Failed", errorMessage);
     }
   };
 
@@ -113,7 +118,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
       <Stack.Screen options={{ headerShown: false }} />
