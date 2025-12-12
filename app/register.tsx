@@ -113,17 +113,19 @@ export default function RegisterScreen() {
     }
     try {
       await register(name, email, password, confirmPassword);
-    } catch (error) {
-      Alert.alert(
-        "Registration Failed",
-        "Please check your inputs and try again"
-      );
+    } catch (error: any) {
+      const data = error.response?.data;
+      const errorMessage = data?.errors
+        ? Object.values(data.errors).flat().join("\n")
+        : data?.message || "Registration failed. Please check your inputs.";
+
+      Alert.alert("Registration Failed", errorMessage);
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
       <Stack.Screen options={{ headerShown: false }} />
