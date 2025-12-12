@@ -11,6 +11,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string, password_confirmation: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
+  updatePassword: (current_password: string, password: string, password_confirmation: string) => Promise<void>;
   setUserToken: (token: string) => Promise<void>;
   setUserInfo: (user: any) => Promise<void>;
 }
@@ -129,6 +130,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const updatePassword = async (current_password: string, password: string, password_confirmation: string) => {
+    setIsLoading(true);
+    try {
+      await api.put('/password', {
+        current_password,
+        password,
+        password_confirmation,
+      });
+    } catch (error: any) {
+      console.log('Update password error', error.response?.data || error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       isLoading, 
@@ -138,6 +155,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       register, 
       logout, 
       updateProfile,
+      updatePassword,
       setUserToken,
       setUserInfo
     }}>
