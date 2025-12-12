@@ -87,12 +87,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password_confirmation,
       });
 
-      const { token, user } = response.data;
-
-      await setUserToken(token);
-      await setUserInfo(user);
-
-      router.replace('/(tabs)');
+      // Navigate to verification screen without setting token
+      router.replace({ pathname: '/verify-email', params: { email } } as any);
     } catch (error: any) {
       console.log('Register error', error.response?.data || error.message);
       throw error;
