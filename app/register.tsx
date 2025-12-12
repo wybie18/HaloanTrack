@@ -1,30 +1,41 @@
-import { Colors } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import api from "@/services/api";
 import { AntDesign } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
-import { Link, Stack } from 'expo-router';
+import { Link, Stack } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { register, isLoading, setUserToken, setUserInfo } = useAuth();
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
+  const theme = Colors[colorScheme ?? "light"];
 
   const handleDeepLink = async (url: string) => {
     try {
       console.log("Processing Deep Link:", url);
       const { queryParams } = Linking.parse(url);
-      
+
       const { token, user, status, message } = (queryParams || {}) as {
         token?: string;
         user?: string;
@@ -34,7 +45,7 @@ export default function RegisterScreen() {
 
       if (token) {
         setUserToken(token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         if (user) {
           try {
@@ -44,14 +55,14 @@ export default function RegisterScreen() {
             console.error("Failed to parse user JSON", e);
           }
         } else {
-            try {
-              const userResponse = await api.get('/user');
-              setUserInfo(userResponse.data);
-            } catch (fetchError) {
-              console.log("Failed to fetch profile", fetchError);
-            }
+          try {
+            const userResponse = await api.get("/user");
+            setUserInfo(userResponse.data);
+          } catch (fetchError) {
+            console.log("Failed to fetch profile", fetchError);
+          }
         }
-      } else if (status === 'error') {
+      } else if (status === "error") {
         Alert.alert("Error", message || "Registration failed");
       }
     } catch (e) {
@@ -60,7 +71,7 @@ export default function RegisterScreen() {
   };
 
   useEffect(() => {
-    const subscription = Linking.addEventListener('url', (event) => {
+    const subscription = Linking.addEventListener("url", (event) => {
       handleDeepLink(event.url);
     });
 
@@ -93,37 +104,51 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
     try {
       await register(name, email, password, confirmPassword);
     } catch (error) {
-      Alert.alert('Registration Failed', 'Please check your inputs and try again');
+      Alert.alert(
+        "Registration Failed",
+        "Please check your inputs and try again"
+      );
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerContainer}>
-          <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
-          <Text style={[styles.subtitle, { color: theme.icon }]}>Join HaloanTrack today</Text>
+          <Text style={[styles.title, { color: theme.text }]}>
+            Create Account
+          </Text>
+          <Text style={[styles.subtitle, { color: theme.icon }]}>
+            Join HaloanTrack today
+          </Text>
         </View>
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
             <Text style={[styles.label, { color: theme.text }]}>Full Name</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                },
+              ]}
               placeholder="Enter your full name"
               placeholderTextColor={theme.icon}
               value={name}
@@ -134,7 +159,14 @@ export default function RegisterScreen() {
           <View style={styles.inputContainer}>
             <Text style={[styles.label, { color: theme.text }]}>Email</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                },
+              ]}
               placeholder="Enter your email"
               placeholderTextColor={theme.icon}
               value={email}
@@ -147,7 +179,14 @@ export default function RegisterScreen() {
           <View style={styles.inputContainer}>
             <Text style={[styles.label, { color: theme.text }]}>Password</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                },
+              ]}
               placeholder="Create a password"
               placeholderTextColor={theme.icon}
               value={password}
@@ -157,9 +196,18 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: theme.text }]}>Confirm Password</Text>
+            <Text style={[styles.label, { color: theme.text }]}>
+              Confirm Password
+            </Text>
             <TextInput
-              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                },
+              ]}
               placeholder="Confirm your password"
               placeholderTextColor={theme.icon}
               value={confirmPassword}
@@ -168,8 +216,8 @@ export default function RegisterScreen() {
             />
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: theme.primary }]} 
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.primary }]}
             onPress={handleRegister}
             disabled={isLoading}
           >
@@ -211,10 +259,14 @@ export default function RegisterScreen() {
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: theme.text }]}>Already have an account? </Text>
+            <Text style={[styles.footerText, { color: theme.text }]}>
+              Already have an account?{" "}
+            </Text>
             <Link href="/login" asChild>
               <TouchableOpacity>
-                <Text style={[styles.link, { color: theme.primary }]}>Login</Text>
+                <Text style={[styles.link, { color: theme.primary }]}>
+                  Login
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -230,7 +282,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   headerContainer: {
@@ -238,14 +290,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   inputContainer: {
     marginBottom: 20,
@@ -253,7 +305,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     marginBottom: 8,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   input: {
     height: 50,
@@ -265,14 +317,14 @@ const styles = StyleSheet.create({
   button: {
     height: 50,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dividerContainer: {
     flexDirection: "row",
@@ -302,8 +354,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 20,
   },
   footerText: {
@@ -311,6 +363,6 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
