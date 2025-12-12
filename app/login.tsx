@@ -2,8 +2,8 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import api from "@/services/api";
-import { AntDesign } from "@expo/vector-icons"; // Import Icon
-import * as Linking from "expo-linking"; // Import Linking
+import { AntDesign } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { Link, Stack } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useState } from "react";
@@ -32,7 +32,7 @@ export default function LoginScreen() {
     try {
       console.log("Processing Deep Link:", url);
       const { queryParams } = Linking.parse(url);
-      
+
       const { token, user, status, message } = (queryParams || {}) as {
         token?: string;
         user?: string;
@@ -42,7 +42,7 @@ export default function LoginScreen() {
 
       if (token) {
         setUserToken(token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         if (user) {
           try {
@@ -52,14 +52,14 @@ export default function LoginScreen() {
             console.error("Failed to parse user JSON", e);
           }
         } else {
-            try {
-              const userResponse = await api.get('/user');
-              setUserInfo(userResponse.data);
-            } catch (fetchError) {
-              console.log("Failed to fetch profile", fetchError);
-            }
+          try {
+            const userResponse = await api.get("/user");
+            setUserInfo(userResponse.data);
+          } catch (fetchError) {
+            console.log("Failed to fetch profile", fetchError);
+          }
         }
-      } else if (status === 'error') {
+      } else if (status === "error") {
         Alert.alert("Error", message || "Login failed");
       }
     } catch (e) {
@@ -68,7 +68,7 @@ export default function LoginScreen() {
   };
 
   useEffect(() => {
-    const subscription = Linking.addEventListener('url', (event) => {
+    const subscription = Linking.addEventListener("url", (event) => {
       handleDeepLink(event.url);
     });
 
@@ -167,6 +167,19 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
+          <Link href={"/forgot-password" as any} asChild>
+            <TouchableOpacity style={{ alignSelf: "flex-end", marginTop: 8 }}>
+              <Text
+                style={{
+                  color: theme.primary,
+                  fontSize: 14,
+                  fontWeight: "600",
+                }}
+              >
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
 
         <TouchableOpacity
