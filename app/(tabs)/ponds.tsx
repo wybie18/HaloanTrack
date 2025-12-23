@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -17,40 +18,56 @@ import {
   View,
 } from "react-native";
 
+interface FishType {
+  id: number;
+  name: string;
+  description: string;
+}
+
 interface Pond {
   id: number;
   name: string;
   fish_count: number;
   status: "active" | "inactive";
   registered_at: string;
+  fish_type_id: number;
+  fish_type?: FishType;
 }
 
 export default function PondsScreen() {
   const [ponds, setPonds] = useState<Pond[]>([]);
+  const [fishTypes, setFishTypes] = useState<FishType[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Add Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [newPondName, setNewPondName] = useState("");
   const [newPondFishCount, setNewPondFishCount] = useState("");
+  const [newPondFishTypeId, setNewPondFishTypeId] = useState<number | null>(null);
 
+  // Edit Modal State
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedPond, setSelectedPond] = useState<Pond | null>(null);
   const [editPondName, setEditPondName] = useState("");
   const [editPondFishCount, setEditPondFishCount] = useState("");
-  const [editPondStatus, setEditPondStatus] = useState<"active" | "inactive">(
-    "active"
-  );
+  const [editPondStatus, setEditPondStatus] = useState<"active" | "inactive">("active");
+  const [editPondFishTypeId, setEditPondFishTypeId] = useState<number | null>(null);
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   useEffect(() => {
-    fetchPonds();
+    fetchData();
   }, []);
 
-  const fetchPonds = async () => {
+  const fetchData = async () => {
     try {
-      const response = await api.get("/ponds");
-      setPonds(response.data);
+      const [pondsRes, fishTypesRes] = await Promise.all([
+        api.get("/ponds"),
+        api.get("/fish-types")
+      ]);
+      setPonds(pondsRes.data);
+      setFishTypes(fishTypesRes.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -59,7 +76,7 @@ export default function PondsScreen() {
   };
 
   const handleAddPond = async () => {
-    if (!newPondName || !newPondFishCount) {
+    if (!newPondName || !newPondFishCount || !newPondFishTypeId) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -69,11 +86,13 @@ export default function PondsScreen() {
         name: newPondName,
         fish_count: parseInt(newPondFishCount),
         status: "active",
+        fish_type_id: newPondFishTypeId,
       });
       setPonds([response.data, ...ponds]);
       setModalVisible(false);
       setNewPondName("");
       setNewPondFishCount("");
+      setNewPondFishTypeId(null);
     } catch (error) {
       Alert.alert("Error", "Failed to add pond");
     }
@@ -84,11 +103,12 @@ export default function PondsScreen() {
     setEditPondName(pond.name);
     setEditPondFishCount(pond.fish_count.toString());
     setEditPondStatus(pond.status);
+    setEditPondFishTypeId(pond.fish_type_id);
     setEditModalVisible(true);
   };
 
   const handleUpdatePond = async () => {
-    if (!selectedPond || !editPondName || !editPondFishCount) {
+    if (!selectedPond || !editPondName || !editPondFishCount || !editPondFishTypeId) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -98,6 +118,7 @@ export default function PondsScreen() {
         name: editPondName,
         fish_count: parseInt(editPondFishCount),
         status: editPondStatus,
+        fish_type_id: editPondFishTypeId,
       });
 
       setPonds(
@@ -161,7 +182,7 @@ export default function PondsScreen() {
           <IconSymbol name="fish.fill" size={16} color={theme.primary} />
           <Text style={[styles.infoText, { color: theme.text }]}>
             {" "}
-            {item.fish_count} Haloan
+            {item.fish_count} {item.fish_type?.name || 'Fish'}
           </Text>
         </View>
         <Text style={[styles.dateText, { color: theme.icon }]}>
@@ -169,6 +190,38 @@ export default function PondsScreen() {
         </Text>
       </View>
     </TouchableOpacity>
+  );
+
+  const renderFishTypeSelector = (
+    selectedId: number | null,
+    onSelect: (id: number) => void
+  ) => (
+    <View style={styles.selectorContainer}>
+      <Text style={[styles.label, { color: theme.text }]}>Fish Type:</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsContainer}>
+        {fishTypes.map((type) => (
+          <TouchableOpacity
+            key={type.id}
+            style={[
+              styles.chip,
+              selectedId === type.id
+                ? { backgroundColor: theme.primary }
+                : { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border },
+            ]}
+            onPress={() => onSelect(type.id)}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                selectedId === type.id ? { color: "#fff" } : { color: theme.text },
+              ]}
+            >
+              {type.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 
   return (
@@ -255,6 +308,8 @@ export default function PondsScreen() {
                 keyboardType="numeric"
               />
 
+              {renderFishTypeSelector(newPondFishTypeId, setNewPondFishTypeId)}
+
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, { backgroundColor: theme.icon }]}
@@ -326,6 +381,8 @@ export default function PondsScreen() {
                 onChangeText={setEditPondFishCount}
                 keyboardType="numeric"
               />
+
+              {renderFishTypeSelector(editPondFishTypeId, setEditPondFishTypeId)}
 
               <View style={styles.statusContainer}>
                 <Text style={[styles.label, { color: theme.text }]}>
@@ -552,5 +609,21 @@ const styles = StyleSheet.create({
   },
   statusButtonText: {
     fontWeight: "600",
+  },
+  selectorContainer: {
+    marginBottom: 16,
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  chipText: {
+    fontWeight: '600',
   },
 });
