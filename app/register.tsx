@@ -1,3 +1,4 @@
+import { PRIVACY_POLICY, TERMS_OF_SERVICE } from "@/constants/constants";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -11,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -27,6 +29,11 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalContent, setModalContent] = useState("");
+
   const { register, isLoading, setUserToken, setUserInfo } = useAuth();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -85,6 +92,10 @@ export default function RegisterScreen() {
   }, []);
 
   const handleGoogleRegister = async () => {
+    if (!isAgreed) {
+      Alert.alert("Error", "You must agree to the Terms of Service and Privacy Policy");
+      return;
+    }
     try {
       const callbackUrl = Linking.createURL("/auth/callback");
 
@@ -111,6 +122,10 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
+    if (!isAgreed) {
+      Alert.alert("Error", "You must agree to the Terms of Service and Privacy Policy");
+      return;
+    }
     try {
       await register(name, email, password, confirmPassword);
     } catch (error: any) {
@@ -121,6 +136,12 @@ export default function RegisterScreen() {
 
       Alert.alert("Registration Failed", errorMessage);
     }
+  };
+
+  const openModal = (title: string, content: string) => {
+    setModalTitle(title);
+    setModalContent(content);
+    setModalVisible(true);
   };
 
   return (
@@ -218,10 +239,29 @@ export default function RegisterScreen() {
             />
           </View>
 
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              style={[styles.checkbox, { borderColor: theme.border, backgroundColor: isAgreed ? theme.primary : 'transparent' }]}
+              onPress={() => setIsAgreed(!isAgreed)}
+            >
+              {isAgreed && <AntDesign name="check" size={16} color="#fff" />}
+            </TouchableOpacity>
+            <View style={styles.checkboxLabelContainer}>
+              <Text style={[styles.checkboxLabel, { color: theme.text }]}>I agree to the </Text>
+              <TouchableOpacity onPress={() => openModal("Terms of Service", TERMS_OF_SERVICE)}>
+                <Text style={[styles.checkboxLink, { color: theme.primary }]}>Terms of Service</Text>
+              </TouchableOpacity>
+              <Text style={[styles.checkboxLabel, { color: theme.text }]}> and </Text>
+              <TouchableOpacity onPress={() => openModal("Privacy Policy", PRIVACY_POLICY)}>
+                <Text style={[styles.checkboxLink, { color: theme.primary }]}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.primary }]}
+            style={[styles.button, { backgroundColor: isAgreed ? theme.primary : theme.icon }]}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={isLoading || !isAgreed}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
@@ -245,9 +285,10 @@ export default function RegisterScreen() {
           <TouchableOpacity
             style={[
               styles.googleButton,
-              { backgroundColor: theme.card, borderColor: theme.border },
+              { backgroundColor: theme.card, borderColor: theme.border, opacity: isAgreed ? 1 : 0.5 },
             ]}
             onPress={handleGoogleRegister}
+            disabled={!isAgreed}
           >
             <AntDesign
               name="google"
@@ -274,6 +315,28 @@ export default function RegisterScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>{modalTitle}</Text>
+            <ScrollView style={styles.modalBody}>
+              <Text style={[styles.modalText, { color: theme.text }]}>{modalContent}</Text>
+            </ScrollView>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: theme.primary }]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -315,6 +378,32 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  checkboxLabelContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+  },
+  checkboxLink: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   button: {
     height: 50,
@@ -366,5 +455,35 @@ const styles = StyleSheet.create({
   link: {
     fontSize: 14,
     fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalBody: {
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  modalButton: {
+    height: 45,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
