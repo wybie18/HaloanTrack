@@ -135,7 +135,7 @@ export default function RegisterScreen() {
             Create Account
           </Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
-            Join HaloanTrack today
+            Join Mudfish Track today
           </Text>
         </View>
 

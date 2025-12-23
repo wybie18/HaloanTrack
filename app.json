@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HaloanTrack",
-    "slug": "HaloanTrack",
+    "name": "Mudfish Track",
+    "slug": "mudfish-track",
     "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

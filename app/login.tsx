@@ -126,11 +126,11 @@ export default function LoginScreen() {
         <View
           style={[styles.logoPlaceholder, { backgroundColor: theme.primary }]}
         >
-          <Text style={styles.logoText}>HT</Text>
+          <Text style={styles.logoText}>MT</Text>
         </View>
-        <Text style={[styles.title, { color: theme.text }]}>HaloanTrack</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Mudfish Track</Text>
         <Text style={[styles.subtitle, { color: theme.icon }]}>
-          Track your Haloan ponds
+          Track your Mudfish ponds
         </Text>
       </View>
 

@@ -91,7 +91,7 @@ export default function HomeScreen() {
           <View style={[styles.statCard, { backgroundColor: theme.card }]}>
             <IconSymbol name="fish.fill" size={32} color={theme.secondary} />
             <Text style={[styles.statValue, { color: theme.text }]}>{stats.fish}</Text>
-            <Text style={[styles.statLabel, { color: theme.icon }]}>Total Haloan</Text>
+            <Text style={[styles.statLabel, { color: theme.icon }]}>Total Mudfish</Text>
           </View>
         </View>
 
